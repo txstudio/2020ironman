@@ -1,0 +1,81 @@
+本篇文章要來介紹微軟提供的範例資料庫 AdventureWorks
+先從 ERD 圖表來檢視範例資料庫的設計
+
+https://stackoverflow.com/questions/37190921/understanding-adventureworks2012-db-structure
+
+接下來依照不同主題進行分類
+
+## SCHEMA 的規劃
+
+從 ERD 圖表可看出 AdvantureWork 在結構描述規劃如
+
+- 人資 (HumanResources)
+- 客戶 (Perosn)
+- 生產 (Production) 
+- 採購 (Purchasing)
+- 銷售 (Sales)
+
+等項目，好的結構描述規劃可讓日後進行權限設定時有比較好的方向
+
+例：
+
+- 生產管理系統的登入帳號僅能存取生產 (Production) 的結構描述內容
+- 應用程式一律不提供存取 dbo/System 等用於儲存設定的結構描述權限
+
+## 資料表物件命名
+
+在資料表命名中可以發現沒有前置詞如 **tbl_Employee** 或是 **Sales_SaleHeader** 等內容
+
+物件命名皆建議使用能代表的完整名稱（軟體開發的物件名稱也是）
+
+且使用結構描述 **SCHEMA** 進行分類
+
+> 多餘且沒有意義的前置詞對物件功能理解與使用時相較之下皆是一種負擔
+
+## 主索引鍵的選擇：都是使用遞增序號
+
+因 SQL Server 叢集索引特性
+
+範例資料庫中主索引鍵皆使用遞增序號進行儲存
+
+主索引鍵的選擇之後會做詳細討論
+
+## MONEY 與 SMALLMONEY
+
+資料表儲存金額的欄位都是使用 MONEY 或是 SMALLMONEY 欄位
+
+跟金額相關的欄位「嚴禁」使用 FLOAT 或是 DOUBLE 欄位
+浮點數資料型態顯示的數值為「近似值」而非實際數值
+
+通常這種問題會發生在產生報表或是計算薪資的時候
+當發現時通常都已經產生很多錯誤資料了
+
+## GUID
+
+會發現部分主資料表還會額外建立 UNIQUEIDENTIFIER 欄位儲存 GUID 資料
+員工、客戶、商品與訂單 ... 等
+
+取得訂單詳細資料是透過遞增序號欄位取得資料的話
+很容易就被知道下一筆或是前一筆訂單序號是多少
+
+透過額外建立 GUID 欄位的方式
+在必要時將顯示詳細資料的索引欄位修改成 GUID
+會更難被猜測出另外一筆資料的索引數值
+
+不過用來關聯的資料表就不太需要額外建立 GUID 欄位
+
+> 例：計量單位資料表
+
+## ErrorLog 資料表
+
+範例資料庫中有一個 StoredProcedure: dbo.uspLogError
+
+可發現該 StoredProc 使用於其他 StoredProc 的 TRY ... CATCH 指令碼片段
+
+當 StoredProc 執行產生錯誤時就會將錯誤訊息記錄到 dbo.ErrorLog 資料表中
+
+## 參考資料
+
+關於 AdvantureWorks 資料庫的更多說明可參考微軟官方文件
+
+https://docs.microsoft.com/zh-tw/sql/samples/adventureworks-install-configure?view=sql-server-2017

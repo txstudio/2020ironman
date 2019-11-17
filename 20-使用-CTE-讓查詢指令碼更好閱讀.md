@@ -1,0 +1,58 @@
+透過 CTE 可以讓子查詢的 Transact-SQL 有更佳的閱讀性
+
+例：
+在一個不嚴謹的資料表設計中
+找出身分證字號重複的清單
+
+```
+SELECT [Key]
+	,[PersonID]
+	,[Column2]
+	,[Column3]
+FROM
+(
+	SELECT [Key]
+		,ROW_NUMBER() OVER (
+			ORDER BY [Key] DESC
+			PARTITION BY [PersonID]
+		) [Index]
+		,[PersonID]
+		,[Column2]
+		,[Column3]
+	FROM [dbo].[Person]
+) A
+WHERE [Index] > 1
+```
+
+將上述指令碼改寫成 CTE
+
+```
+;WITH [DuplicatePersonIDTable] AS (
+	SELECT [Key]
+		,ROW_NUMBER() OVER (
+			ORDER BY [Key] DESC
+			PARTITION BY [PersonID]
+		) [Index]
+		,[PersonID]
+		,[Column2]
+		,[Column3]
+	FROM [dbo].[Person]
+)
+SELECT [Key]
+	,[PersonID]
+	,[Column2]
+	,[Column3]
+FROM [DuplicatePersonIDTable]
+WHERE [Index] > 1
+```
+
+將子查詢的指令碼搬移到查詢的最上方
+閱讀起來相較之下更明瞭	
+
+CTE 搭配 UNION 可以使用在遞迴情境中
+
+譬如：
+找出指定商品類別下的所有類別清單
+
+參考文件
+https://docs.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql?view=sql-server-2017#examples
