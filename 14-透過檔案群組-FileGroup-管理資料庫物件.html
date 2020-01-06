@@ -1,0 +1,52 @@
+14-透過檔案群組-FileGroup-管理資料庫物件
+2020ironman-day14-use-file-group-to-manage-database-objects.html
+
+<p>檔案群組是用來儲存資料庫物件的檔案</p>
+
+<p>在設計上會建議資料表的索引儲存在與資料內容不同的檔案群組<br/>
+並可將儲存索引的檔案群組放置讀取速度較快的儲存位置<br/>
+（例：固態硬碟）</p>
+
+<h2>經驗談</h2>
+
+<h3>不需要嘗試將資料表<strong>資料內容</strong>與<strong>叢集主索引鍵</strong>的檔案群組分開</h3>
+
+<p>叢集主索引鍵的檔案群組就是該資料表資料內容檔案群組位置</p>
+
+<p>例</p>
+
+<pre><code>CREATE TABLE [dbo].[FileGroupDemoTable]
+(
+    [Id]        INT IDENTITY(1,1),
+
+    ...
+
+    CONSTRAINT [PK_FileGroupDemoTable]
+        PRIMARY KEY CLUSTERED ([Id]) ON [INDEX]
+
+) ON [PRIMARY]</code></pre>
+
+<p>使用上述指令碼建立之後<br/>
+檢查檔案群組儲存空間使用量時<br/>
+發現下列狀況</p>
+
+<pre><code>檔案群組    使用空間(MB)
+PRIMARY        0 MB
+INDEX        30 MB
+</code></pre>
+
+<p>資料內容都儲存到 PRIMARY KEY CLUSTERED 指定的 [INDEX] 檔案群組位置</p>
+
+<p>將非叢集索引建立到不同檔案群組才可分離 I/O </p>
+
+<p>要將資料內容改儲存到 PRIMARY 檔案群組的話<br/>
+重新設定 CLUSTERED INDEX 的檔案群組位置即可</p>
+
+<p>資料表的資料是依據「叢集索引 (clustered-index)」儲存的檔案群組而定<br/>
+PRIMARY KEY NONCLUSTERED 不會影響到資料內容的儲存位置</p>
+
+<h3>TEXTIMAGE_NO</h3>
+
+<p>透過指定資料表的 <strong>TEXTIMAGE_ON</strong> 可指定大數值資料行儲存至額外的檔案群組</p>
+
+<p>當查詢指定大數值資料行欄位時，才會去讀取 TEXTIMAGE_ON 指定的檔案群組</p>

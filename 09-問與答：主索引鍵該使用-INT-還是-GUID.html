@@ -1,0 +1,58 @@
+09-問與答：主索引鍵該使用-INT-還是-GUID
+2020ironman-day09-qa-use-int-or-guid-for-primary-key-data-type.html
+
+<p>回答這個問題前<br/>
+先從欄位的儲存空間開始</p>
+
+<h3>UNIQUEIDENTIFIER</h3>
+
+<p>儲存空間是 16 位元</p>
+
+<p>https://docs.microsoft.com/en-us/sql/t-sql/data-types/uniqueidentifier-transact-sql?view=sql-server-2017</p>
+
+<h3>BIGINT</h3>
+
+<p>儲存空間是 8 位元</p>
+
+<p>https://docs.microsoft.com/en-us/sql/t-sql/data-types/int-bigint-smallint-and-tinyint-transact-sql?view=sql-server-2017</p>
+
+<p>使用 GUID 欄位所需要的儲存空間是使用 BIGINT 的兩倍，INT 的四倍</p>
+
+<h3>再談索引鍵特性</h3>
+
+<p>預設 SQL Server 的主索引鍵為叢集索引<br/>
+叢集索引的特性就是預先排序</p>
+
+<p>使用遞增性質欄位 (INT) 做叢集主索引鍵時<br/>
+每次新增資料就會於最末端進行新增</p>
+
+<p>若使用隨機性質 (GUID) 的欄位時<br/>
+每次新增資料就會重新掃描後再進行新增<br/>
+（相較之下會影響新增資料的效能）</p>
+
+<h3>使用 GUID 的極端例子</h3>
+
+<p>將所有資料表的主索引鍵都建立成 UNIQUEIDENTIFIER 欄位<br/>
+在 JOIN 資料表的時候比起使用數值欄位相較之下就很吃效能</p>
+
+<p>將所有員工資料表與所屬縣市資料表進行 JOIN<br/>
+若縣市資料表主索引鍵使用 GUID 的話</p>
+
+<p>JOIN 的成本就會是員工資料表總數 x GUID (16) 的空間</p>
+
+<p>使用 TINYINT 作為縣市資料表主索引鍵的話</p>
+
+<p>JOIN 的成本就會是員工資料表總數 x TINYINT (1) 的空間</p>
+
+<p>在上述情境「主索引鍵」使用「數值」欄位就會比較節省成本</p>
+
+<p>從 AdventureWork 範例資料庫可以發現<br/>
+主索引鍵以數值欄位為主</p>
+
+<p>就 SQL Server 叢集索引特性來說<br/>
+主索引鍵選擇數值欄位會是比較好的作法</p>
+
+<p>若真的很在意使用數字作為主索引鍵會有用完的問題<br/>
+就可以考慮使用 NEWSEQUENTIALID() 產生具有遞增性質的 GUID 型態</p>
+
+<p>https://docs.microsoft.com/en-us/sql/t-sql/functions/newsequentialid-transact-sql?view=sql-server-2017</p>

@@ -1,0 +1,94 @@
+02-正規化設計之自我拿捏要領：以成本觀點
+2020ironman-day02-cost-opinion-for-table-normalization.html
+
+<p>在資料表設計最經常性聽到的名詞就是正規化
+常見的正規化名稱為</p>
+
+<ul>
+<li>「第一正規化」</li>
+<li>「第二正規化」</li>
+<li>「第三正規化」</li>
+</ul>
+
+<blockquote>
+  <p>正規化的執行步驟網路上的資訊很多就不在此描述</p>
+</blockquote>
+
+<p>若無法記住各正規化的詳細描述與步驟<br/>
+小弟在設計資料表時主要拿捏要領</p>
+
+<ul>
+<li>減少儲存成本</li>
+<li>增加效能：減少 I/O 成本 byte vs CHAR(10) 差了十倍</li>
+</ul>
+
+<h2>使用範例來解釋</h2>
+
+<h3>非正規化(可優化)資料表</h3>
+
+<p>以訂單主資料表部分欄位為例</p>
+
+<pre><code>Order.OrderHeader
+---------------------------
+Id        OrderNo     Status
+---------------------------
+1        ORDER001    Processing
+2        ORDER002    Finished
+3        ORDER003    Cancelled
+4        ORDER004    Finished
+5        ORDER005    Processing
+</code></pre>
+
+<p>上每一筆資料列的最大儲存成本為</p>
+
+<p><strong>Orders.OrderHeader</strong></p>
+
+<pre><code>INT + CHAR(8) + VARCHAR(10) = 4+8+12 = 24 (Byte)
+</code></pre>
+
+<h3>正規化(優化)之後</h3>
+
+<pre><code>Order.OrderStatus
+--------------------------------
+Id        Name
+--------------------------------
+1        Processing
+2        Finished
+3        Cancelled
+
+Order.OrderHeader
+--------------------------------
+Id        OrderNo     StatusId
+--------------------------------
+1        ORDER001    1
+2        ORDER002    2
+3        ORDER003    3
+4        ORDER004    2
+5        ORDER005    1
+</code></pre>
+
+<p>每一筆資料列的最大儲存成本為</p>
+
+<p><strong>Order.OrderStatus</strong></p>
+
+<pre><code>TINYINT + VARCHAR(10) = 1+12 = 13 (Byte)
+</code></pre>
+
+<p><strong>Order.OrderHeader</strong></p>
+
+<pre><code>INT + CHAR(8) + TINYINT = 4+8+1 = 13 (Byte)
+</code></pre>
+
+<p>可以發現 <strong>Order.OrderHeader</strong> 資料表的儲存成本降低了<br/>
+當資料量越龐大的情況下<br/>
+此設計所節省的儲存成本就會更明顯</p>
+
+<p>透過正規化設計能夠有效的減少儲存成本<br/>
+雖然儲存成本相較於記憶體或處理起來說是低廉</p>
+
+<p>但是在存取成本上<br/>
+從硬碟存取資料的成本<br/>
+相較記憶體就高了許多</p>
+
+<p>當然<br/>
+必要時也得對資料表進行非正規化設計</p>

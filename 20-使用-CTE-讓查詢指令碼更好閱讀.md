@@ -1,3 +1,7 @@
+20-使用-CTE-讓查詢指令碼更好閱讀
+2020ironman-day20-sql-login-user-and-role.html
+
+
 透過 CTE 可以讓子查詢的 Transact-SQL 有更佳的閱讀性
 
 例：

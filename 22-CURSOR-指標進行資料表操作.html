@@ -1,0 +1,49 @@
+22-CURSOR-指標進行資料表操作
+2020ironman-day22-use-cursor-in-t-sql.html
+
+<p>先前某個情境</p>
+
+<p>Table-A</p>
+
+<pre><code>Id    A   B   C
+1    A1  B1  123
+2    A1  B2  551
+3    A2  B3  13
+</code></pre>
+
+<p>Table-B</p>
+
+<pre><code>Id    A   B   D
+1    A1  B1  11
+2    A1  B2  76
+3    A2  B3  9
+</code></pre>
+
+<p>要將 Table-A 的 C 欄位資料儲存到 Table-B 的 D 欄位
+使用 CURSOR 將 Table-A 的 A|B 欄位逐筆比對更新到 Table-B 中的 D 欄位</p>
+
+<p>為了保持一致性設定了 Transaction 
+為了比對快速對 A|B 欄位加入了索引</p>
+
+<p>問題解決了
+但是卻產生了另一個問題</p>
+
+<p>先來討論 CURSOR 的特性
+CURSOR 僅使用「單一核心」並逐筆進行（不會鎖定整張資料表）</p>
+
+<h2>上述情境最佳解</h2>
+
+<p>應使用 UPDATE JOIN 來善用多核心進行處理
+CURSOR 僅單一核心的特性會讓資料處理時間相較之下較久
+這時再加上 Transaction 等於又將資料表鎖定起來</p>
+
+<ul>
+<li>要減少資料鎖定情況可以考慮使用 CURSOR</li>
+<li>使用 CURSOR 不應使用 Transaction </li>
+</ul>
+
+<h3>先前使用 CURSOR 情境</h3>
+
+<p>將前一個月份的「存取紀錄資料表」搬移到封存的資料表
+此時「存取紀錄資料表」還是處於上線狀態
+新的紀錄還是可以寫到「存取紀錄資料表」中</p>

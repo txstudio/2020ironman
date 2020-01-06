@@ -1,0 +1,45 @@
+11-問與答：開發階段（甚至是上線後）不應在資料表中建立關聯
+2020ironman-day11-qa-do-not-use-fk-references-even-in-release.html
+
+<h2>論點</h2>
+
+<h3>影響開發進度</h3>
+
+<p>開發階段若資料表有建立關聯<br/>
+在整理資料表內容的時候會因為<strong>關聯</strong>而綁手綁腳<br/>
+拖慢開發速度</p>
+
+<h3>影響資料處理</h3>
+
+<p>為何要建立關聯<br/>
+這樣子進行<strong>資料匯入</strong>的時候會有問題<br/>
+為何要多做這種事情來限制自己的行為</p>
+
+<h2>答</h2>
+
+<p>首先要回到原點<br/>
+為何<strong>資料表與資料表之間要有關聯</strong><br/>
+關聯可以保持資料的完整性<br/>
+讓資料表不會出現沒有意義的資料內容（髒資料）<br/>
+朝向最佳化的資料庫設計邁進</p>
+
+<p>通常在開發階段不建立關聯<br/>
+上線後基本上都不會補上去<br/>
+到時資料產生異常時就會耗費更多的成本進行整理</p>
+
+<p>資料表間有設定關聯<br/>
+能讓接手或是日後再訓練開發人員時<br/>
+更快了解資料表間的<strong>相依關係</strong></p>
+
+<p>不過實務上<br/>
+小心設定外來鍵參考為<strong>ON DELETE CASCADE</strong><br/>
+當相依性關係龐大時<br/>
+若不小心將主要資料刪除時<br/>
+其他相依的資料列就會自動刪除</p>
+
+<p>沒有關聯的資料表示可以被 <strong>TRUNCATE</strong> 的<br/>
+然而 <strong>TRUNCATE</strong> 與 <strong>DELETE</strong> 一個重要的差異<br/>
+<strong>TRUNCATE</strong> 是不會進事件紀錄<br/>
+故無法使用<strong>事件紀錄</strong>來還原到最近的時間點<br/>
+當然這個指令可透過權限設定等方式進行限制<br/>
+有設定關聯的資料表變相可避免無心或惡意情況下對資料表執行 <strong>TRUNCATE</strong> 指令</p>

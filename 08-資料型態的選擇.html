@@ -1,0 +1,89 @@
+08-資料型態的選擇
+2020ironman-day08-data-type-choice.html
+
+<p>選擇資料型態原則就是：<strong>長度夠用就好</strong></p>
+
+<h2>欄位長度選擇案例</h2>
+
+<p>若有欄位是儲存國家地區代碼，就應該使用 CHAR(2)</p>
+
+<blockquote>TW,EN,GB ... etc</blockquote>
+
+<p>參考 ISO 標準
+https://en.wikipedia.org/wiki/ISO<em>3166-1</em>alpha-2</p>
+
+<h2>字串欄位</h2>
+
+<p>若今天僅儲存英數字資料型態就可以使用 VARCHAR(N)</p>
+
+<blockquote>員工資料的英文姓名、商品英文名稱</blockquote>
+
+<p>長度固定的字串欄位就可以使用 CHAR(N)</p>
+
+<blockquote>訂單編號</blockquote>
+
+<p>當欄位儲存非英文字的名稱，就應使用 NVARCHAR(N) 欄位</p>
+
+<blockquote>員工資料的中文名稱</blockquote>
+
+<p>有人會問說「可是我的 VARCHAR 資料型態還是可以儲存中文」</p>
+
+<p>VARCHAR 能夠儲存中文是根據資料庫「定序」而定</p>
+
+<p>當今天資料庫定序是非中文設定時</p>
+
+<p>VARCHAR 儲存的中文內容就會變成亂碼</p>
+
+<blockquote>此問題會經常發生在資料從不同資料庫轉移的過程</blockquote>
+
+<p><strong>請注意在 SQL Server 資料庫中</strong></p>
+
+<p>VARCHAR(1) 相較之下是浪費空間的欄位型態：使用 (1+2 bytes)<br/>
+應使用 CHAR(1)：使用 (1 bytes)</p>
+
+<p>電子商務網站的訂單狀態適合使用 TINYINT (只需要一個 Byte)</p>
+
+<h2>時間欄位</h2>
+
+<p>若使用 Azure SQL Database<br/>
+要注意預設情況下 GETDATE() 取得的時間為 UTC 時間</p>
+
+<p>應用程式有跨時區問題的話<br/>
+欄位就應考慮使用 DATETIMEOFFSET 型態來儲存時區位移</p>
+
+<blockquote>
+  <p>台北時間為 +08:00</p>
+</blockquote>
+
+<p>截至目前：Azure Database 服務無法切換預設時區</p>
+
+<h3>在查詢中搭配 AT TIME ZONE 切換時區</h3>
+
+<p>若要調整 DATATIMEOFFSET 資料型態顯示日期時間的話
+可使用 <strong>AT TIME ZONE</strong> 搭配該時區文字進行切換</p>
+
+<blockquote>TPE 時間名稱為「Taipei Standard Time」</blockquote>
+
+<p>範例 Transact-SQL 指令碼如下</p>
+
+<pre><code>DECLARE @TimeZone NVARCHAR(100)
+
+SET @TimeZone = 'Taipei Standard Time'
+
+SELECT SYSDATETIMEOFFSET() [DateTime(UTC)]
+    ,SYSDATETIMEOFFSET() AT TIME ZONE @TimeZone [DateTime(TPE)]
+
+/*
+output
+--------------------------------------------------------------------------
+DateTime(UTC)                            DateTime(TPE)
+2019-09-02 09:43:01.5612886 +00:00        2019-09-02 17:43:01.5612886 +08:00
+--------------------------------------------------------------------------
+*/
+</code></pre>
+
+<h3>時區轉換參考資料</h3>
+
+<p>https://docs.microsoft.com/en-us/sql/t-sql/queries/at-time-zone-transact-sql?view=sql-server-2017</p>
+
+<p>https://techcommunity.microsoft.com/t5/Azure-Database-Support-Blog/Lesson-Learned-4-Modifying-the-default-time-zone-for-your-local/ba-p/368798</p>

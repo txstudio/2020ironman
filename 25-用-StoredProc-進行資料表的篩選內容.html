@@ -1,0 +1,57 @@
+25-用-StoredProc-進行資料表的篩選內容
+2020ironman-day25-filter-data-in-store-procedure.html
+
+<p>查詢是一個應用程式常見功能
+然而依使用者輸入參數進行不同條件篩選</p>
+
+<p>對應用程式開發人員而言
+或許會使用組合字串的方式對查詢語法進行加工</p>
+
+<blockquote>
+  <p>在 EntityFramework 就是如此達成</p>
+</blockquote>
+
+<p>對資料庫開發人員而言
+動態產生的 SQL 字串就是件麻煩事情</p>
+
+<p>因為不同的查詢語法代表
+雖顯示的欄位相同
+但是使用的執行計畫會不相同</p>
+
+<p>對於選擇性參數
+可以考慮使用下列方式設計查詢語法</p>
+
+<pre><code>WHERE [Column] = ISNULL(@Column, [Column])</code></pre>
+
+<p>若使用模糊搜尋可考慮使用</p>
+
+<pre><code>WHERE (@UserName IS NULL OR [UserName] LIKE '%'+@UserName+'%')</code></pre>
+
+<p>組合起來的查詢片段可能如下</p>
+
+<pre><code>WHERE [Column] = ISNULL(@Column, [Column])
+    AND [Column1] = ISNULL(@Column1, [Column1])
+    AND (@UserName IS NULL OR [UserName] LIKE '%'+@UserName+'%')
+</code></pre>
+
+<p>在 Azure Database 中上述做法的執行計畫會是相同的</p>
+
+<blockquote>
+  <p>使用 [Column] LIKE '%ABC%' 的查詢就算 [Column] 有建立索引也不會使用索引搜尋</p>
+</blockquote>
+
+<p>也可嘗試使用 CHARINDEX(@Column,[Column]) > 0
+來替換 LIKE 片段</p>
+
+<blockquote>
+  <p>某些情境下會變成 Index Seed 降低查詢成本</p>
+</blockquote>
+
+<p>若要提供分頁功能
+就可以使用 OFFSET ... FETCH 來取代 ROW_NUMBER </p>
+
+<blockquote>
+  <p>可不可以使用就要看資料庫的版本</p>
+</blockquote>
+
+<p>https://docs.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql?view=sql-server-2017#using-offset-and-fetch-to-limit-the-rows-returned</p>
